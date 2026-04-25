@@ -1,46 +1,28 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 
-class AuthService extends ChangeNotifier {
+class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  User? _user;
 
-  User? get user => _user;
-
-  AuthService() {
-    _auth.authStateChanges().listen((User? user) {
-      _user = user;
-      notifyListeners();
-    });
-  }
-
+  // Stream para escutar mudanças no estado de autenticação do usuário
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  Future<void> login(String email, String password) async {
-    try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-    } catch (e) {
-      rethrow;
-    }
+  User? get currentUser => _auth.currentUser;
+
+  Future<UserCredential> signIn(String email, String password) async {
+    return await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
-  Future<void> cadastrar(String email, String password) async {
-    try {
-      await _auth.createUserWithEmailAndPassword(email: email, password: password);
-    } catch (e) {
-      rethrow;
-    }
+  Future<UserCredential> signUp(String email, String password) async {
+    return await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
-  Future<void> logout() async {
+  Future<void> signOut() async {
     await _auth.signOut();
-  }
-
-  Future<void> recuperarSenha(String email) async {
-    try {
-      await _auth.sendPasswordResetEmail(email: email);
-    } catch (e) {
-      rethrow;
-    }
   }
 }

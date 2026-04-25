@@ -1,43 +1,53 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Servico {
-  String? id;
-  String empresa;
-  String descricaoServico;
-  DateTime dataServico;
-  double valorCobrado;
-  String tipoServico;
-  String statusNf;
+  final String id;
+  final String numeroOs;
+  final DateTime dataServico;
+  final String empresa;
+  final String nomeServico;
+  final String descricaoServico;
+  final String tipoServico;
+  final double valorCobrado;
+  final String statusNf;
 
   Servico({
-    this.id,
-    required this.empresa,
-    required this.descricaoServico,
+    required this.id,
+    required this.numeroOs,
     required this.dataServico,
-    required this.valorCobrado,
+    required this.empresa,
+    required this.nomeServico,
+    required this.descricaoServico,
     required this.tipoServico,
+    required this.valorCobrado,
     this.statusNf = 'Pendente',
   });
 
   factory Servico.fromMap(Map<String, dynamic> map, String documentId) {
     return Servico(
       id: documentId,
-      empresa: map['empresa'] ?? '',
-      descricaoServico: map['descricaoServico'] ?? '',
+      numeroOs: map['numeroOs'] ?? '',
+      // Tratamento específico para o Timestamp do Firestore
       dataServico: (map['dataServico'] as Timestamp).toDate(),
-      valorCobrado: (map['valorCobrado'] ?? 0.0).toDouble(),
+      empresa: map['empresa'] ?? '',
+      nomeServico: map['nomeServico'] ?? '',
+      descricaoServico: map['descricaoServico'] ?? '',
       tipoServico: map['tipoServico'] ?? 'Regular',
+      // Garante que valores inteiros sejam lidos como double
+      valorCobrado: (map['valorCobrado'] ?? 0.0).toDouble(),
       statusNf: map['statusNf'] ?? 'Pendente',
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'empresa': empresa,
-      'descricaoServico': descricaoServico,
+      'numeroOs': numeroOs,
       'dataServico': Timestamp.fromDate(dataServico),
-      'valorCobrado': valorCobrado,
+      'empresa': empresa,
+      'nomeServico': nomeServico,
+      'descricaoServico': descricaoServico,
       'tipoServico': tipoServico,
+      'valorCobrado': valorCobrado,
       'statusNf': statusNf,
     };
   }

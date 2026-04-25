@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "333396433158",
+    "project_id": "oficina-148c8",
+    "storage_bucket": "oficina-148c8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333396433158:android:53381c2445d6e086382687",
+        "android_client_info": {
+          "package_name": "com.company.oficina"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNEgxsejq1jzBnbjCxFxt9OF0Rv5bqMHU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333396433158:android:1d32bf514951a3b0382687",
+        "android_client_info": {
+          "package_name": "com.example.app_oficina"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNEgxsejq1jzBnbjCxFxt9OF0Rv5bqMHU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
