@@ -1,26 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+
+// O 'hide' é essencial para evitar o conflito com a nossa classe AuthProvider
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 
-// Importação dos Providers
+// Importação das configurações automáticas do Firebase
+import 'firebase_options.dart';
+
+// Importação dos seus Providers (Lógica de Negócio)
 import 'providers/auth_provider.dart';
 import 'providers/empresa_provider.dart';
 import 'providers/servico_provider.dart';
 
-// Importação das Views
+// Importação das Telas (UI)
 import 'views/auth/login_view.dart';
 import 'views/home/home_view.dart';
 
 void main() async {
-  // Garante que o binding do Flutter esteja inicializado antes de chamadas nativas assíncronas
+  // Inicialização obrigatória para apps Flutter com Firebase
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Inicializa o Firebase (certifique-se de ter rodado o flutterfire configure)
-  await Firebase.initializeApp();
+  // Conecta o app às configurações geradas pelo FlutterFire CLI
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(
-    // Injeção de Dependências Global
+    // Injeção de dependências: Disponibiliza os dados para todo o app
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
@@ -40,69 +47,68 @@ class ForjaApp extends StatelessWidget {
     return MaterialApp(
       title: 'Forja ERP',
       debugShowCheckedModeBanner: false,
-      // Aplicação do Design System "Forja & Futuro" em nível global
+      
+      // Configuração Global do Design System "Forja & Futuro"
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF121212), // Fundo Ônix/Grafite
+        scaffoldBackgroundColor: const Color(0xFF121212), // Ônix Profundo
+        
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFFD85A36),     // Laranja Terracota
-          secondary: Color(0xFF39FF14),   // Verde Neon
-          surface: Color(0xFF1E1E1E),     // Cinza Metálico
+          primary: Color(0xFFD85A36),       // Laranja Terracota
+          secondary: Color(0xFF39FF14),     // Verde Neon
+          surface: Color(0xFF1E1E1E),       // Cinza Metálico
+          onSurface: Colors.white,
+          onPrimary: Colors.white,
         ),
+
+        // Estilização padrão da AppBar (Cabeçalho)
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFFD85A36),
           foregroundColor: Colors.white,
           centerTitle: true,
           elevation: 0,
         ),
+
+        // Estilização do Botão Flutuante (+)
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: Color(0xFF39FF14),
           foregroundColor: Color(0xFF121212),
         ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFD85A36),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        ),
+
+        // Estilização de Campos de Texto (Inputs)
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: const Color(0xFF1E1E1E),
           labelStyle: const TextStyle(color: Colors.white54),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xFF39FF14), width: 1.5),
           ),
         ),
       ),
-      // Roteamento de inicialização baseado no estado de autenticação
+
+      // Lógica de Roteamento Baseada em Estado
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          // Enquanto o Firebase verifica o cache de login, exibe um loading
+          // Enquanto verifica o cache do dispositivo
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
-              backgroundColor: Color(0xFF121212),
-              body: Center(
-                child: CircularProgressIndicator(color: Color(0xFFD85A36)),
-              ),
+              body: Center(child: CircularProgressIndicator(color: Color(0xFFD85A36))),
             );
           }
           
-          // Se possuir dados (usuário logado), direciona para a Home
+          // Se o usuário já está logado, entra direto
           if (snapshot.hasData) {
             return const HomeView();
           }
           
-          // Caso contrário, direciona para o Login
+          // Se não há usuário, exige login
           return const LoginView();
         },
       ),
