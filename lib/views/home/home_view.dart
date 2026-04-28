@@ -67,7 +67,7 @@ class _HomeViewState extends State<HomeView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: const Color(0xFF22262B),
         title: const Text('Excluir OS', style: TextStyle(color: Colors.white)),
         content: Text('Deseja excluir permanentemente a ${servico.numeroOs}?', style: const TextStyle(color: Colors.white70)),
         actions: [
@@ -97,10 +97,10 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: const Color(0xFF17191C),
       appBar: AppBar(
         title: const Text('Painel de Serviços', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFFD85A36),
+        backgroundColor: const Color(0xFF5D9CEC),
         actions: [
           IconButton(
             icon: const Icon(Icons.business, color: Colors.white),
@@ -118,7 +118,7 @@ class _HomeViewState extends State<HomeView> {
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            color: const Color(0xFF1E1E1E),
+            color: const Color(0xFF22262B),
             child: Column(
               children: [
                 TextField(
@@ -126,7 +126,7 @@ class _HomeViewState extends State<HomeView> {
                   decoration: InputDecoration(
                     hintText: 'Buscar OS, Empresa ou Serviço...',
                     hintStyle: const TextStyle(color: Colors.white54),
-                    prefixIcon: const Icon(Icons.search, color: Color(0xFFD85A36)),
+                    prefixIcon: const Icon(Icons.search, color: Color(0xFF5D9CEC)),
                     filled: true,
                     fillColor: const Color(0xFF2A2A2A),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
@@ -173,9 +173,9 @@ class _HomeViewState extends State<HomeView> {
                       builder: (context, child) => Theme(
                         data: Theme.of(context).copyWith(
                           colorScheme: const ColorScheme.dark(
-                            primary: Color(0xFFD85A36),
+                            primary: Color(0xFF5D9CEC),
                             onPrimary: Colors.white,
-                            surface: Color(0xFF1E1E1E),
+                            surface: Color(0xFF22262B),
                           ),
                         ),
                         child: child!,
@@ -183,7 +183,7 @@ class _HomeViewState extends State<HomeView> {
                     );
                     if (range != null) setState(() => _intervaloDatas = range);
                   },
-                  icon: const Icon(Icons.calendar_today, size: 18, color: Color(0xFF39FF14)),
+                  icon: const Icon(Icons.calendar_today, size: 18, color: Color(0xFF90A4AE)),
                   label: Text(
                     _intervaloDatas == null 
                       ? 'Filtrar por Data' 
@@ -202,7 +202,7 @@ class _HomeViewState extends State<HomeView> {
             child: StreamBuilder<List<Servico>>(
               stream: context.read<ServicoProvider>().servicosStream,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: Color(0xFFD85A36)));
+                if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: Color(0xFF5D9CEC)));
                 if (snapshot.hasError) return const Center(child: Text('Erro ao carregar serviços.', style: TextStyle(color: Colors.red)));
 
                 var servicos = snapshot.data ?? [];
@@ -229,7 +229,7 @@ class _HomeViewState extends State<HomeView> {
                   itemBuilder: (context, index) {
                     final servico = servicos[index];
                     return Card(
-                      color: const Color(0xFF1E1E1E),
+                      color: const Color(0xFF22262B),
                       margin: const EdgeInsets.only(bottom: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12), 
@@ -243,7 +243,7 @@ class _HomeViewState extends State<HomeView> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(servico.numeroOs, style: const TextStyle(color: Color(0xFF39FF14), fontWeight: FontWeight.bold, fontSize: 16)),
+                                Text(servico.numeroOs, style: const TextStyle(color: Color(0xFF90A4AE), fontWeight: FontWeight.bold, fontSize: 16)),
                                 Row(
                                   children: [
                                     // NOVO: Menu de Opções da OS (Editar / Excluir)
@@ -264,7 +264,7 @@ class _HomeViewState extends State<HomeView> {
                                     ),
                                     Text(formatadorData.format(servico.dataServico), style: const TextStyle(color: Colors.white54, fontSize: 12)),
                                     IconButton(
-                                      icon: const Icon(Icons.edit_calendar, size: 16, color: Color(0xFFD85A36)),
+                                      icon: const Icon(Icons.edit_calendar, size: 16, color: Color(0xFF5D9CEC)),
                                       onPressed: () async {
                                         final novaData = await showDatePicker(
                                           context: context,
@@ -313,7 +313,7 @@ class _HomeViewState extends State<HomeView> {
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF121212), 
+                                  color: const Color(0xFF17191C), 
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(color: const Color(0xFF2A2A2A)),
                                 ),
@@ -354,7 +354,7 @@ class _HomeViewState extends State<HomeView> {
                                   ],
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.send_rounded, color: Color(0xFF39FF14), size: 32),
+                                  icon: const Icon(Icons.send_rounded, color: Color(0xFF90A4AE), size: 32),
                                   onPressed: () => _compartilharWhatsApp(servico),
                                 )
                               ],
@@ -371,7 +371,7 @@ class _HomeViewState extends State<HomeView> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFD85A36),
+        backgroundColor: const Color(0xFF5D9CEC),
         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ServicoFormView())),
         child: const Icon(Icons.add, color: Colors.white),
       ),

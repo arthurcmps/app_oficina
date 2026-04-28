@@ -12,12 +12,14 @@ class RegisterView extends StatefulWidget {
 class _RegisterViewState extends State<RegisterView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController(); // NOVO CONTROLLER
   final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose(); // NOVO DISPOSE
     super.dispose();
   }
 
@@ -30,18 +32,17 @@ class _RegisterViewState extends State<RegisterView> {
       _passwordController.text.trim(),
     );
 
-    // Validação de segurança de contexto
     if (!mounted) return;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Conta criada com sucesso!'),
-          backgroundColor: Color(0xFF39FF14),
+          backgroundColor: Color(0xFF90A4AE),
           behavior: SnackBarBehavior.floating,
         ),
       );
-      Navigator.pop(context); // Retorna para o Login
+      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -57,11 +58,11 @@ class _RegisterViewState extends State<RegisterView> {
     final isLoading = context.watch<AuthProvider>().isLoading;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: const Color(0xFF17191C),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFFD85A36)),
+        iconTheme: const IconThemeData(color: Color(0xFF5D9CEC)),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -89,7 +90,7 @@ class _RegisterViewState extends State<RegisterView> {
                     labelText: 'E-mail',
                     labelStyle: const TextStyle(color: Colors.white54),
                     filled: true,
-                    fillColor: const Color(0xFF1E1E1E),
+                    fillColor: const Color(0xFF22262B),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -106,7 +107,7 @@ class _RegisterViewState extends State<RegisterView> {
                     labelText: 'Senha (mínimo 6 caracteres)',
                     labelStyle: const TextStyle(color: Colors.white54),
                     filled: true,
-                    fillColor: const Color(0xFF1E1E1E),
+                    fillColor: const Color(0xFF22262B),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -114,7 +115,29 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   validator: (val) {
                     if (val == null || val.isEmpty) return 'Preencha a senha';
-                    if (val.length < 6) return 'A senha deve ter no mínimo 6 caracteres';
+                    if (val.length < 6) return 'Mínimo 6 caracteres';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                // NOVO: Campo de Confirmação de Senha
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  style: const TextStyle(color: Colors.white),
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Confirmar Senha',
+                    labelStyle: const TextStyle(color: Colors.white54),
+                    filled: true,
+                    fillColor: const Color(0xFF22262B),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  validator: (val) {
+                    if (val == null || val.isEmpty) return 'Confirme sua senha';
+                    if (val != _passwordController.text) return 'As senhas não coincidem';
                     return null;
                   },
                 ),
@@ -123,7 +146,7 @@ class _RegisterViewState extends State<RegisterView> {
                   height: 50,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD85A36),
+                      backgroundColor: const Color(0xFF5D9CEC),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

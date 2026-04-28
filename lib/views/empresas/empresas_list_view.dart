@@ -18,7 +18,7 @@ class _EmpresasListViewState extends State<EmpresasListView> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
+          backgroundColor: const Color(0xFF22262B),
           title: const Text('Nova Empresa', style: TextStyle(color: Colors.white)),
           content: TextField(
             controller: nomeController,
@@ -27,8 +27,8 @@ class _EmpresasListViewState extends State<EmpresasListView> {
             decoration: const InputDecoration(
               hintText: 'Nome do cliente/empresa',
               hintStyle: TextStyle(color: Colors.white54),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFD85A36))),
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF39FF14))),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF5D9CEC))),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF90A4AE))),
             ),
           ),
           actions: [
@@ -37,7 +37,7 @@ class _EmpresasListViewState extends State<EmpresasListView> {
               child: const Text('CANCELAR', style: TextStyle(color: Colors.white54)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD85A36)),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5D9CEC)),
               onPressed: () async {
                 final nome = nomeController.text;
                 if (nome.isNotEmpty) {
@@ -59,7 +59,7 @@ class _EmpresasListViewState extends State<EmpresasListView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: const Color(0xFF22262B),
         title: const Text('Editar Empresa', style: TextStyle(color: Colors.white)),
         content: TextField(
           controller: nomeController,
@@ -75,7 +75,7 @@ class _EmpresasListViewState extends State<EmpresasListView> {
             child: const Text('CANCELAR', style: TextStyle(color: Colors.white54))
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD85A36)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5D9CEC)),
             onPressed: () async {
               await context.read<EmpresaProvider>().editarEmpresa(empresa.id, nomeController.text);
               if (context.mounted) Navigator.pop(context);
@@ -92,7 +92,7 @@ class _EmpresasListViewState extends State<EmpresasListView> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
+          backgroundColor: const Color(0xFF22262B),
           title: const Text('Excluir Empresa', style: TextStyle(color: Colors.white)),
           content: Text('Tem certeza que deseja excluir "${empresa.nome}"?', style: const TextStyle(color: Colors.white70)),
           actions: [
@@ -115,16 +115,16 @@ class _EmpresasListViewState extends State<EmpresasListView> {
     final provider = context.read<EmpresaProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: const Color(0xFF17191C),
       appBar: AppBar(
         title: const Text('Empresas Clientes', style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFFD85A36),
+        backgroundColor: const Color(0xFF5D9CEC),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: StreamBuilder<List<Empresa>>(
         stream: provider.empresasStream,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: Color(0xFFD85A36)));
+          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: Color(0xFF5D9CEC)));
           if (snapshot.hasError) return const Center(child: Text('Erro ao carregar empresas.', style: TextStyle(color: Colors.red)));
 
           final empresas = snapshot.data ?? [];
@@ -136,11 +136,11 @@ class _EmpresasListViewState extends State<EmpresasListView> {
             itemBuilder: (context, index) {
               final empresa = empresas[index];
               return Card(
-                color: const Color(0xFF1E1E1E),
+                color: const Color(0xFF22262B),
                 margin: const EdgeInsets.only(bottom: 12.0),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: ListTile(
-                  leading: const CircleAvatar(backgroundColor: Color(0xFF2A2A2A), child: Icon(Icons.business, color: Color(0xFF39FF14))),
+                  leading: const CircleAvatar(backgroundColor: Color(0xFF2A2A2A), child: Icon(Icons.business, color: Color(0xFF90A4AE))),
                   title: Text(empresa.nome, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   // NOVO: Row contendo os botões Editar e Excluir
                   trailing: Row(
@@ -163,8 +163,8 @@ class _EmpresasListViewState extends State<EmpresasListView> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF39FF14),
-        foregroundColor: const Color(0xFF121212),
+        backgroundColor: const Color(0xFF90A4AE),
+        foregroundColor: const Color(0xFF17191C),
         onPressed: _mostrarDialogoNovaEmpresa,
         child: const Icon(Icons.add, size: 28),
       ),

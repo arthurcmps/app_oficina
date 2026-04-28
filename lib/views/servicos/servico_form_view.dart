@@ -75,7 +75,7 @@ class _ServicoFormViewState extends State<ServicoFormView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: const Color(0xFF17191C),
       appBar: AppBar(
         title: Text(widget.servicoParaEditar == null ? 'Nova OS' : 'Editar ${widget.servicoParaEditar!.numeroOs}'),
       ),
@@ -90,7 +90,7 @@ class _ServicoFormViewState extends State<ServicoFormView> {
                 builder: (context, snapshot) {
                   final empresas = snapshot.data ?? [];
                   return DropdownButtonFormField<String>(
-                    dropdownColor: const Color(0xFF1E1E1E),
+                    dropdownColor: const Color(0xFF22262B),
                     value: _empresaSelecionada,
                     decoration: _inputDecoration('Empresa Cliente'),
                     items: empresas.map((e) => DropdownMenuItem(value: e.nome, child: Text(e.nome))).toList(),
@@ -104,7 +104,7 @@ class _ServicoFormViewState extends State<ServicoFormView> {
               TextFormField(controller: _descricaoController, maxLines: 3, decoration: _inputDecoration('Descrição Técnica'), style: const TextStyle(color: Colors.white)),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                dropdownColor: const Color(0xFF1E1E1E),
+                dropdownColor: const Color(0xFF22262B),
                 value: _tipoServico,
                 decoration: _inputDecoration('Tipo'),
                 items: ['Regular', 'Emergencial'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
@@ -128,5 +128,5 @@ class _ServicoFormViewState extends State<ServicoFormView> {
     );
   }
 
-  InputDecoration _inputDecoration(String label) => InputDecoration(labelText: label, filled: true, fillColor: const Color(0xFF1E1E1E));
+  InputDecoration _inputDecoration(String label) => InputDecoration(labelText: label, filled: true, fillColor: const Color(0xFF22262B));
 }

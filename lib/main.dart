@@ -59,37 +59,45 @@ class ForjaApp extends StatelessWidget {
       ],
       
       // Configuração Global do Design System "Forja & Futuro"
+      // Nova Configuração Global do Design System: "Senhor da Forja"
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF121212), // Ônix Profundo
+        scaffoldBackgroundColor: const Color(0xFF17191C), // Cinza Chumbo Profundo
         
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFFD85A36),       // Laranja Terracota
-          secondary: Color(0xFF39FF14),     // Verde Neon
-          surface: Color(0xFF1E1E1E),       // Cinza Metálico
+          primary: Color(0xFF5D9CEC),       // Azul Ogum (Claro)
+          secondary: Color(0xFF4FC3F7),     // Azul Ciano/Prata (Destaques)
+          surface: Color(0xFF22262B),       // Aço Fosco (Cards e Inputs)
           onSurface: Colors.white,
           onPrimary: Colors.white,
         ),
 
-        // Estilização padrão da AppBar (Cabeçalho)
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFD85A36),
-          foregroundColor: Colors.white,
+          backgroundColor: Color(0xFF22262B), // Fundo da AppBar metálico
+          foregroundColor: Color(0xFF5D9CEC), // Título e ícones em Azul
           centerTitle: true,
           elevation: 0,
         ),
 
-        // Estilização do Botão Flutuante (+)
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Color(0xFF39FF14),
-          foregroundColor: Color(0xFF121212),
+          backgroundColor: Color(0xFF5D9CEC), // Azul Ogum
+          foregroundColor: Colors.white,
         ),
 
-        // Estilização de Campos de Texto (Inputs)
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF5D9CEC),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: const Color(0xFF1E1E1E),
+          fillColor: const Color(0xFF22262B), // Aço Fosco
           labelStyle: const TextStyle(color: Colors.white54),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -97,7 +105,7 @@ class ForjaApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF39FF14), width: 1.5),
+            borderSide: const BorderSide(color: Color(0xFF5D9CEC), width: 1.5),
           ),
         ),
       ),
@@ -109,7 +117,7 @@ class ForjaApp extends StatelessWidget {
           // Enquanto verifica o cache do dispositivo
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
-              body: Center(child: CircularProgressIndicator(color: Color(0xFFD85A36))),
+              body: Center(child: CircularProgressIndicator(color: Color(0xFF5D9CEC))),
             );
           }
           

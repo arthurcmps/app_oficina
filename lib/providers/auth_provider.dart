@@ -52,4 +52,19 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     await _authService.signOut();
   }
+
+  // NOVO: Lógica de estado para recuperação de senha
+  Future<bool> resetPassword(String email) async {
+    _setLoading(true);
+    _setError(null);
+    try {
+      await _authService.sendPasswordResetEmail(email);
+      _setLoading(false);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      _setError(e.message ?? 'Erro desconhecido ao redefinir senha');
+      _setLoading(false);
+      return false;
+    }
+  }
 }

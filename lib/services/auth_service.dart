@@ -25,4 +25,9 @@ class AuthService {
   Future<void> signOut() async {
     await _auth.signOut();
   }
+
+  // NOVO: Envio de e-mail para recuperação de senha
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
 }
