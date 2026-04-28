@@ -11,6 +11,16 @@ class ServicoProvider extends ChangeNotifier {
     await _repository.addServico(servico);
   }
 
+  // NOVO: Editar
+  Future<void> editarServico(Servico servico) async {
+    await _repository.updateServico(servico);
+  }
+
+  // NOVO: Excluir
+  Future<void> excluirServico(String id) async {
+    await _repository.deleteServico(id);
+  }
+
   Future<void> atualizarStatusNf(String id, String novoStatus) async {
     await _repository.updateStatusNf(id, novoStatus);
   }

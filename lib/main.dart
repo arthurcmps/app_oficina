@@ -16,6 +16,7 @@ import 'providers/servico_provider.dart';
 // Importação das Telas (UI)
 import 'views/auth/login_view.dart';
 import 'views/home/home_view.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   // Inicialização obrigatória para apps Flutter com Firebase
@@ -47,6 +48,15 @@ class ForjaApp extends StatelessWidget {
     return MaterialApp(
       title: 'Forja ERP',
       debugShowCheckedModeBanner: false,
+
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+      ],
       
       // Configuração Global do Design System "Forja & Futuro"
       theme: ThemeData(

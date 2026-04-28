@@ -23,7 +23,7 @@ class _HomeViewState extends State<HomeView> {
   DateTimeRange? _intervaloDatas;
 
   final formatadorMoeda = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-  final formatadorData = DateFormat('dd/MM/yyyy HH:mm');
+  final formatadorData = DateFormat('dd/MM/yyyy');
 
   Future<void> _compartilharWhatsApp(Servico servico) async {
     final mensagem = "⚙️ *FORJA ERP - Ordem de Serviço*\n\n"
@@ -34,11 +34,11 @@ class _HomeViewState extends State<HomeView> {
         "💰 *Valor:* ${formatadorMoeda.format(servico.valorCobrado)}\n\n"
         "Por favor, emitir a Nota Fiscal. Status atual: ${servico.statusNf}";
 
-    final url = Uri.parse("whatsapp://send?text=${Uri.encodeComponent(mensagem)}");
+    final url = Uri.parse("https://api.whatsapp.com/send?text=${Uri.encodeComponent(mensagem)}");
     
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
+    try {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Não foi possível abrir o WhatsApp.'), backgroundColor: Colors.redAccent),
@@ -61,6 +61,30 @@ class _HomeViewState extends State<HomeView> {
         ),
       );
     }
+  }
+
+  void _confirmarExclusaoOs(Servico servico) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text('Excluir OS', style: TextStyle(color: Colors.white)),
+        content: Text('Deseja excluir permanentemente a ${servico.numeroOs}?', style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), 
+            child: const Text('CANCELAR', style: TextStyle(color: Colors.white54))
+          ),
+          TextButton(
+            onPressed: () async {
+              await context.read<ServicoProvider>().excluirServico(servico.id);
+              if (context.mounted) Navigator.pop(context);
+            },
+            child: const Text('EXCLUIR', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _fazerLogout() async {
@@ -194,7 +218,7 @@ class _HomeViewState extends State<HomeView> {
                     dataMatch = s.dataServico.isAfter(_intervaloDatas!.start.subtract(const Duration(seconds: 1))) &&
                                 s.dataServico.isBefore(_intervaloDatas!.end.add(const Duration(days: 1)));
                   }
-                  return buscaMatch && statusMatch && tipoMatch && dataMatch; // CORRIGIDO AQUI
+                  return buscaMatch && statusMatch && tipoMatch && dataMatch; 
                 }).toList();
 
                 if (servicos.isEmpty) return const Center(child: Text('Nenhum serviço encontrado.', style: TextStyle(color: Colors.white54)));
@@ -220,9 +244,24 @@ class _HomeViewState extends State<HomeView> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(servico.numeroOs, style: const TextStyle(color: Color(0xFF39FF14), fontWeight: FontWeight.bold, fontSize: 16)),
-                                // NOVO: Bloco de Data + Botão de Edição
                                 Row(
                                   children: [
+                                    // NOVO: Menu de Opções da OS (Editar / Excluir)
+                                    PopupMenuButton<String>(
+                                      icon: const Icon(Icons.more_vert, color: Colors.white54, size: 20),
+                                      color: const Color(0xFF2A2A2A),
+                                      onSelected: (val) {
+                                        if (val == 'edit') {
+                                          Navigator.push(context, MaterialPageRoute(builder: (_) => ServicoFormView(servicoParaEditar: servico)));
+                                        } else if (val == 'delete') {
+                                          _confirmarExclusaoOs(servico);
+                                        }
+                                      },
+                                      itemBuilder: (context) => [
+                                        const PopupMenuItem(value: 'edit', child: Text('Editar', style: TextStyle(color: Colors.white))),
+                                        const PopupMenuItem(value: 'delete', child: Text('Excluir', style: TextStyle(color: Colors.redAccent))),
+                                      ],
+                                    ),
                                     Text(formatadorData.format(servico.dataServico), style: const TextStyle(color: Colors.white54, fontSize: 12)),
                                     IconButton(
                                       icon: const Icon(Icons.edit_calendar, size: 16, color: Color(0xFFD85A36)),
@@ -234,7 +273,9 @@ class _HomeViewState extends State<HomeView> {
                                           lastDate: DateTime.now().add(const Duration(days: 365)),
                                         );
                                         if (novaData != null && context.mounted) {
-                                          context.read<ServicoProvider>().atualizarDataServico(servico.id, novaData);
+                                          // Cria uma nova instância apenas com Ano, Mês e Dia (hora fica 00:00:00)
+                                          final dataSemHora = DateTime(novaData.year, novaData.month, novaData.day);
+                                          context.read<ServicoProvider>().atualizarDataServico(servico.id, dataSemHora);
                                         }
                                       },
                                     ),
@@ -245,6 +286,26 @@ class _HomeViewState extends State<HomeView> {
                             const Divider(color: Color(0xFF2A2A2A), height: 24),
                             Text(servico.empresa, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
                             const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(
+                                  servico.tipoServico == 'Emergencial' ? Icons.warning_amber_rounded : Icons.build_circle_outlined,
+                                  size: 16,
+                                  color: servico.tipoServico == 'Emergencial' ? Colors.redAccent : Colors.white54,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  servico.tipoServico,
+                                  style: TextStyle(
+                                    color: servico.tipoServico == 'Emergencial' ? Colors.redAccent : Colors.white54,
+                                    fontSize: 13,
+                                    fontWeight: servico.tipoServico == 'Emergencial' ? FontWeight.bold : FontWeight.normal,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
                             Text(servico.nomeServico, style: const TextStyle(color: Colors.white70)),
                             if (servico.descricaoServico.trim().isNotEmpty) ...[
                               const SizedBox(height: 12),

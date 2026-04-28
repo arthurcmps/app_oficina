@@ -6,7 +6,9 @@ import '../../providers/empresa_provider.dart';
 import '../../providers/servico_provider.dart';
 
 class ServicoFormView extends StatefulWidget {
-  const ServicoFormView({super.key});
+  final Servico? servicoParaEditar; // Parâmetro opcional
+
+  const ServicoFormView({super.key, this.servicoParaEditar});
 
   @override
   State<ServicoFormView> createState() => _ServicoFormViewState();
@@ -23,6 +25,19 @@ class _ServicoFormViewState extends State<ServicoFormView> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Se estiver editando, preenche os campos
+    if (widget.servicoParaEditar != null) {
+      _empresaSelecionada = widget.servicoParaEditar!.empresa;
+      _tipoServico = widget.servicoParaEditar!.tipoServico;
+      _nomeController.text = widget.servicoParaEditar!.nomeServico;
+      _descricaoController.text = widget.servicoParaEditar!.descricaoServico;
+      _valorController.text = widget.servicoParaEditar!.valorCobrado.toString();
+    }
+  }
+
+  @override
   void dispose() {
     _nomeController.dispose();
     _descricaoController.dispose();
@@ -30,32 +45,31 @@ class _ServicoFormViewState extends State<ServicoFormView> {
     super.dispose();
   }
 
-  Future<void> _salvarServico() async {
-    if (!_formKey.currentState!.validate() || _empresaSelecionada == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Preencha todos os campos e selecione uma empresa.')));
-      return;
-    }
+  Future<void> _salvar() async {
+    if (!_formKey.currentState!.validate() || _empresaSelecionada == null) return;
 
     setState(() => _isLoading = true);
 
-    final novoServico = Servico(
-      id: '', // Gerado no Firestore
-      numeroOs: '', // Gerado automaticamente no Repository
-      dataServico: DateTime.now(),
+    final servico = Servico(
+      id: widget.servicoParaEditar?.id ?? '',
+      numeroOs: widget.servicoParaEditar?.numeroOs ?? '',
+      dataServico: widget.servicoParaEditar?.dataServico ?? DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
       empresa: _empresaSelecionada!,
       nomeServico: _nomeController.text.trim(),
       descricaoServico: _descricaoController.text.trim(),
       tipoServico: _tipoServico,
       valorCobrado: double.tryParse(_valorController.text.replaceAll(',', '.')) ?? 0.0,
+      statusNf: widget.servicoParaEditar?.statusNf ?? 'Pendente',
     );
 
-    await context.read<ServicoProvider>().adicionarServico(novoServico);
+    if (widget.servicoParaEditar == null) {
+      await context.read<ServicoProvider>().adicionarServico(servico);
+    } else {
+      await context.read<ServicoProvider>().editarServico(servico);
+    }
 
     if (!mounted) return;
-    Navigator.pop(context); // Volta para a Home
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('OS Criada com sucesso!'), backgroundColor: Color(0xFF39FF14)),
-    );
+    Navigator.pop(context);
   }
 
   @override
@@ -63,83 +77,48 @@ class _ServicoFormViewState extends State<ServicoFormView> {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        title: const Text('Nova Ordem de Serviço', style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFFD85A36),
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(widget.servicoParaEditar == null ? 'Nova OS' : 'Editar ${widget.servicoParaEditar!.numeroOs}'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Dropdown reativo de Empresas
               StreamBuilder<List<Empresa>>(
                 stream: context.read<EmpresaProvider>().empresasStream,
                 builder: (context, snapshot) {
                   final empresas = snapshot.data ?? [];
                   return DropdownButtonFormField<String>(
                     dropdownColor: const Color(0xFF1E1E1E),
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      labelText: 'Empresa Cliente',
-                      labelStyle: const TextStyle(color: Colors.white54),
-                      filled: true,
-                      fillColor: const Color(0xFF1E1E1E),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-                    ),
                     value: _empresaSelecionada,
+                    decoration: _inputDecoration('Empresa Cliente'),
                     items: empresas.map((e) => DropdownMenuItem(value: e.nome, child: Text(e.nome))).toList(),
                     onChanged: (val) => setState(() => _empresaSelecionada = val),
-                    validator: (val) => val == null ? 'Selecione uma empresa' : null,
                   );
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _nomeController,
-                style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration('Nome do Serviço (ex: Usinagem de Eixo)'),
-                validator: (val) => val!.isEmpty ? 'Campo obrigatório' : null,
-              ),
+              TextFormField(controller: _nomeController, decoration: _inputDecoration('Nome do Serviço'), style: const TextStyle(color: Colors.white)),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _descricaoController,
-                style: const TextStyle(color: Colors.white),
-                maxLines: 3,
-                decoration: _inputDecoration('Descrição técnica detalhada'),
-              ),
+              TextFormField(controller: _descricaoController, maxLines: 3, decoration: _inputDecoration('Descrição Técnica'), style: const TextStyle(color: Colors.white)),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 dropdownColor: const Color(0xFF1E1E1E),
-                style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration('Tipo de Serviço'),
                 value: _tipoServico,
+                decoration: _inputDecoration('Tipo'),
                 items: ['Regular', 'Emergencial'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
                 onChanged: (val) => setState(() => _tipoServico = val!),
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _valorController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration('Valor Cobrado (R\$)'),
-                validator: (val) => val!.isEmpty ? 'Campo obrigatório' : null,
-              ),
+              TextFormField(controller: _valorController, keyboardType: TextInputType.number, decoration: _inputDecoration('Valor (R\$)'), style: const TextStyle(color: Colors.white)),
               const SizedBox(height: 32),
               SizedBox(
+                width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF39FF14), // Verde Neon
-                    foregroundColor: const Color(0xFF121212),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: _isLoading ? null : _salvarServico,
-                  child: _isLoading 
-                      ? const CircularProgressIndicator(color: Color(0xFF121212)) 
-                      : const Text('SALVAR ORDEM DE SERVIÇO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  onPressed: _isLoading ? null : _salvar,
+                  child: _isLoading ? const CircularProgressIndicator() : const Text('SALVAR ALTERAÇÕES'),
                 ),
               ),
             ],
@@ -149,13 +128,5 @@ class _ServicoFormViewState extends State<ServicoFormView> {
     );
   }
 
-  InputDecoration _inputDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(color: Colors.white54),
-      filled: true,
-      fillColor: const Color(0xFF1E1E1E),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-    );
-  }
+  InputDecoration _inputDecoration(String label) => InputDecoration(labelText: label, filled: true, fillColor: const Color(0xFF1E1E1E));
 }

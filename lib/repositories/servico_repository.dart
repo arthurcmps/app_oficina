@@ -6,7 +6,6 @@ class ServicoRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'services';
 
-  // Busca em tempo real de serviços, ordenando pelos mais recentes
   Stream<List<Servico>> getServicosStream() {
     return _firestore
         .collection(_collection)
@@ -17,21 +16,13 @@ class ServicoRepository {
             .toList());
   }
 
-  Future<void> updateDataServico(String id, DateTime novaData) async {
-  await _firestore.collection(_collection).doc(id).update({
-    'dataServico': Timestamp.fromDate(novaData),
-    });
-  }
-
-  // Adiciona o serviço gerando a OS automaticamente
   Future<void> addServico(Servico servico) async {
     final String datePart = DateFormat('yyyyMMdd').format(DateTime.now());
     
-    // Busca a última OS criada hoje para definir o próximo sequencial
     final query = await _firestore
         .collection(_collection)
         .where('numeroOs', isGreaterThanOrEqualTo: 'OS-$datePart-')
-        .where('numeroOs', isLessThan: 'OS-$datePart-\uf8ff') // Filtro de string avançado
+        .where('numeroOs', isLessThan: 'OS-$datePart-\uf8ff')
         .orderBy('numeroOs', descending: true)
         .limit(1)
         .get();
@@ -46,17 +37,29 @@ class ServicoRepository {
     final String seqPart = nextSeq.toString().padLeft(3, '0');
     final String generatedOs = 'OS-$datePart-$seqPart';
 
-    // Cria o map base e sobrescreve o numeroOs com o valor gerado
     final mapData = servico.toMap();
     mapData['numeroOs'] = generatedOs;
 
     await _firestore.collection(_collection).add(mapData);
   }
 
-  // Função extra útil para atualizar apenas o status da NF
+  // NOVO: Atualizar OS Completa
+  Future<void> updateServico(Servico servico) async {
+    await _firestore.collection(_collection).doc(servico.id).update(servico.toMap());
+  }
+
+  // NOVO: Deletar OS
+  Future<void> deleteServico(String id) async {
+    await _firestore.collection(_collection).doc(id).delete();
+  }
+
   Future<void> updateStatusNf(String id, String novoStatus) async {
+    await _firestore.collection(_collection).doc(id).update({'statusNf': novoStatus});
+  }
+
+  Future<void> updateDataServico(String id, DateTime novaData) async {
     await _firestore.collection(_collection).doc(id).update({
-      'statusNf': novoStatus,
+      'dataServico': Timestamp.fromDate(novaData),
     });
   }
 }
