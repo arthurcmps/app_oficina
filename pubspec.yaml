@@ -20,6 +20,7 @@ dependencies:
   # Utilitários
   intl: ^0.20.2
   url_launcher: ^6.3.0
+  local_auth: ^2.3.0
 
 
   cupertino_icons: ^1.0.8
@@ -46,10 +47,14 @@ flutter_launcher_icons:
 
 # Configuração da Tela de Abertura (Splash Screen)
 flutter_native_splash:
-  color: "#17191C" # O nosso fundo Cinza Chumbo Profundo!
+  color: "#17191C"
   image: "assets/images/splash.png"
   android: true
   ios: true
+  
+  # Regras específicas e chatas do Android 12+
   android_12:
     image: "assets/images/splash.png"
     color: "#17191C"
+    # Opcional: Se quiser garantir que ele use a imagem pura como um ícone no meio da tela
+    # icon_background_color: "#17191C"

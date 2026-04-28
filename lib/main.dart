@@ -17,6 +17,7 @@ import 'providers/servico_provider.dart';
 import 'views/auth/login_view.dart';
 import 'views/home/home_view.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'views/auth/biometric_view.dart';
 
 void main() async {
   // Inicialização obrigatória para apps Flutter com Firebase
@@ -114,19 +115,17 @@ class ForjaApp extends StatelessWidget {
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          // Enquanto verifica o cache do dispositivo
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator(color: Color(0xFF5D9CEC))),
             );
           }
           
-          // Se o usuário já está logado, entra direto
           if (snapshot.hasData) {
-            return const HomeView();
+            // Em vez de retornar const HomeView(), retornamos o Bloqueio Biométrico!
+            return const BiometricView();
           }
           
-          // Se não há usuário, exige login
           return const LoginView();
         },
       ),

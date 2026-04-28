@@ -6,8 +6,9 @@
             <data android:scheme="https" />
         </intent>
     </queries>
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
     <application
-        android:label="Forja"
+        android:label="Forja ERP"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
