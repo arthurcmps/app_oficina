@@ -5,7 +5,6 @@ import '../repositories/servico_repository.dart';
 class ServicoProvider extends ChangeNotifier {
   final ServicoRepository _repository = ServicoRepository();
 
-  // Expõe a Stream bruta. Os filtros avançados serão aplicados na UI para poupar leituras no Firestore.
   Stream<List<Servico>> get servicosStream => _repository.getServicosStream();
 
   Future<void> adicionarServico(Servico servico) async {
@@ -14,5 +13,9 @@ class ServicoProvider extends ChangeNotifier {
 
   Future<void> atualizarStatusNf(String id, String novoStatus) async {
     await _repository.updateStatusNf(id, novoStatus);
+  }
+
+  Future<void> atualizarDataServico(String id, DateTime novaData) async {
+    await _repository.updateDataServico(id, novaData);
   }
 }

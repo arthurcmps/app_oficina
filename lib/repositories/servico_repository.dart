@@ -17,6 +17,12 @@ class ServicoRepository {
             .toList());
   }
 
+  Future<void> updateDataServico(String id, DateTime novaData) async {
+  await _firestore.collection(_collection).doc(id).update({
+    'dataServico': Timestamp.fromDate(novaData),
+    });
+  }
+
   // Adiciona o serviço gerando a OS automaticamente
   Future<void> addServico(Servico servico) async {
     final String datePart = DateFormat('yyyyMMdd').format(DateTime.now());

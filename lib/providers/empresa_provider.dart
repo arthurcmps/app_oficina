@@ -16,4 +16,9 @@ class EmpresaProvider extends ChangeNotifier {
   Future<void> removerEmpresa(String id) async {
     await _repository.deleteEmpresa(id);
   }
+
+  Future<void> editarEmpresa(String id, String novoNome) async {
+  if (novoNome.trim().isEmpty) return;
+  await _repository.updateEmpresa(id, novoNome.trim());
+  }
 }

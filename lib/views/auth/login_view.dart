@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import 'register_view.dart';
-// import '../home/home_view.dart'; // Será importado no Passo 5
+import '../home/home_view.dart';
+
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -36,12 +37,17 @@ class _LoginViewState extends State<LoginView> {
     if (!mounted) return;
 
     if (success) {
-      // Navegar para a Home (substituiremos a rota no Passo 5)
-      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeView()));
+      // Redirecionamento explícito e forçado para a Home
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeView()),
+      );
+
+      // Mantemos o SnackBar para o feedback visual positivo
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Login efetuado com sucesso!'),
-          backgroundColor: Color(0xFF39FF14), // Verde Neon de sucesso
+          backgroundColor: Color(0xFF39FF14),
           behavior: SnackBarBehavior.floating,
         ),
       );

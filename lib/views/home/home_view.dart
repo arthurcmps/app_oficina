@@ -20,6 +20,7 @@ class _HomeViewState extends State<HomeView> {
   String _termoBusca = '';
   String _filtroStatus = 'Todos';
   String _filtroTipo = 'Todos';
+  DateTimeRange? _intervaloDatas;
 
   final formatadorMoeda = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
   final formatadorData = DateFormat('dd/MM/yyyy HH:mm');
@@ -43,6 +44,22 @@ class _HomeViewState extends State<HomeView> {
           const SnackBar(content: Text('Não foi possível abrir o WhatsApp.'), backgroundColor: Colors.redAccent),
         );
       }
+    }
+  }
+
+  Future<void> _alternarStatusNf(Servico servico) async {
+    final novoStatus = servico.statusNf == 'Pendente' ? 'Emitida' : 'Pendente';
+    
+    await context.read<ServicoProvider>().atualizarStatusNf(servico.id, novoStatus);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Status da NF da ${servico.numeroOs} atualizado para: $novoStatus'),
+          backgroundColor: novoStatus == 'Emitida' ? Colors.blue : Colors.orange,
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -75,7 +92,6 @@ class _HomeViewState extends State<HomeView> {
       ),
       body: Column(
         children: [
-          // Área de Filtros
           Container(
             padding: const EdgeInsets.all(16),
             color: const Color(0xFF1E1E1E),
@@ -119,10 +135,45 @@ class _HomeViewState extends State<HomeView> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Color(0xFF2A2A2A)),
+                  ),
+                  onPressed: () async {
+                    final range = await showDateRangePicker(
+                      context: context,
+                      firstDate: DateTime(2023),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                      builder: (context, child) => Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: const ColorScheme.dark(
+                            primary: Color(0xFFD85A36),
+                            onPrimary: Colors.white,
+                            surface: Color(0xFF1E1E1E),
+                          ),
+                        ),
+                        child: child!,
+                      ),
+                    );
+                    if (range != null) setState(() => _intervaloDatas = range);
+                  },
+                  icon: const Icon(Icons.calendar_today, size: 18, color: Color(0xFF39FF14)),
+                  label: Text(
+                    _intervaloDatas == null 
+                      ? 'Filtrar por Data' 
+                      : '${formatadorData.format(_intervaloDatas!.start).split(' ')[0]} - ${formatadorData.format(_intervaloDatas!.end).split(' ')[0]}',
+                  ),
+                ),
+                if (_intervaloDatas != null)
+                  TextButton(
+                    onPressed: () => setState(() => _intervaloDatas = null),
+                    child: const Text('Limpar Filtro de Data', style: TextStyle(color: Colors.redAccent, fontSize: 12)),
+                  ),
               ],
             ),
           ),
-          // Lista de Resultados
           Expanded(
             child: StreamBuilder<List<Servico>>(
               stream: context.read<ServicoProvider>().servicosStream,
@@ -132,14 +183,18 @@ class _HomeViewState extends State<HomeView> {
 
                 var servicos = snapshot.data ?? [];
 
-                // Aplicação dos Filtros Combinados
                 servicos = servicos.where((s) {
                   final buscaMatch = s.numeroOs.toLowerCase().contains(_termoBusca) ||
                                      s.empresa.toLowerCase().contains(_termoBusca) ||
                                      s.nomeServico.toLowerCase().contains(_termoBusca);
                   final statusMatch = _filtroStatus == 'Todos' || s.statusNf == _filtroStatus;
                   final tipoMatch = _filtroTipo == 'Todos' || s.tipoServico == _filtroTipo;
-                  return buscaMatch && statusMatch && tipoMatch;
+                  bool dataMatch = true;
+                  if (_intervaloDatas != null) {
+                    dataMatch = s.dataServico.isAfter(_intervaloDatas!.start.subtract(const Duration(seconds: 1))) &&
+                                s.dataServico.isBefore(_intervaloDatas!.end.add(const Duration(days: 1)));
+                  }
+                  return buscaMatch && statusMatch && tipoMatch && dataMatch; // CORRIGIDO AQUI
                 }).toList();
 
                 if (servicos.isEmpty) return const Center(child: Text('Nenhum serviço encontrado.', style: TextStyle(color: Colors.white54)));
@@ -152,7 +207,10 @@ class _HomeViewState extends State<HomeView> {
                     return Card(
                       color: const Color(0xFF1E1E1E),
                       margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: servico.tipoServico == 'Emergencial' ? Colors.red.withOpacity(0.5) : Colors.transparent)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12), 
+                        side: BorderSide(color: servico.tipoServico == 'Emergencial' ? Colors.red.withOpacity(0.5) : Colors.transparent)
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -162,14 +220,49 @@ class _HomeViewState extends State<HomeView> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(servico.numeroOs, style: const TextStyle(color: Color(0xFF39FF14), fontWeight: FontWeight.bold, fontSize: 16)),
-                                Text(formatadorData.format(servico.dataServico), style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                                // NOVO: Bloco de Data + Botão de Edição
+                                Row(
+                                  children: [
+                                    Text(formatadorData.format(servico.dataServico), style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                                    IconButton(
+                                      icon: const Icon(Icons.edit_calendar, size: 16, color: Color(0xFFD85A36)),
+                                      onPressed: () async {
+                                        final novaData = await showDatePicker(
+                                          context: context,
+                                          initialDate: servico.dataServico,
+                                          firstDate: DateTime(2023),
+                                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                                        );
+                                        if (novaData != null && context.mounted) {
+                                          context.read<ServicoProvider>().atualizarDataServico(servico.id, novaData);
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                             const Divider(color: Color(0xFF2A2A2A), height: 24),
                             Text(servico.empresa, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
                             const SizedBox(height: 4),
                             Text(servico.nomeServico, style: const TextStyle(color: Colors.white70)),
-                            const SizedBox(height: 12),
+                            if (servico.descricaoServico.trim().isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF121212), 
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: const Color(0xFF2A2A2A)),
+                                ),
+                                child: Text(
+                                  servico.descricaoServico,
+                                  style: const TextStyle(color: Colors.white54, fontSize: 13, fontStyle: FontStyle.italic),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -177,7 +270,26 @@ class _HomeViewState extends State<HomeView> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text('Valor: ${formatadorMoeda.format(servico.valorCobrado)}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                                    Text('NF: ${servico.statusNf}', style: TextStyle(color: servico.statusNf == 'Emitida' ? Colors.blue : Colors.orange)),
+                                    const SizedBox(height: 8),
+                                    GestureDetector(
+                                      onTap: () => _alternarStatusNf(servico),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: servico.statusNf == 'Emitida' ? Colors.blue.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(20),
+                                          border: Border.all(color: servico.statusNf == 'Emitida' ? Colors.blue : Colors.orange),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(servico.statusNf == 'Emitida' ? Icons.check_circle : Icons.pending, size: 14, color: servico.statusNf == 'Emitida' ? Colors.blue : Colors.orange),
+                                            const SizedBox(width: 6),
+                                            Text('NF: ${servico.statusNf}', style: TextStyle(color: servico.statusNf == 'Emitida' ? Colors.blue : Colors.orange, fontSize: 12, fontWeight: FontWeight.bold)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 IconButton(
@@ -198,7 +310,7 @@ class _HomeViewState extends State<HomeView> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFD85A36), // Terracota
+        backgroundColor: const Color(0xFFD85A36),
         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ServicoFormView())),
         child: const Icon(Icons.add, color: Colors.white),
       ),

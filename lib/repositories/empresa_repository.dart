@@ -23,4 +23,10 @@ class EmpresaRepository {
   Future<void> deleteEmpresa(String id) async {
     await _firestore.collection(_collection).doc(id).delete();
   }
+
+  Future<void> updateEmpresa(String id, String novoNome) async {
+  await _firestore.collection(_collection).doc(id).update({
+    'nome': novoNome,
+    });
+  }
 }
